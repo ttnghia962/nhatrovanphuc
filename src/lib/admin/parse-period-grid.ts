@@ -14,7 +14,7 @@ export function parsePeriodGrid(formData: FormData): PeriodRowInput[] {
   const roomNumbers = new Set<number>();
 
   for (const key of formData.keys()) {
-    const match = key.match(/^(?:tenantName|occupied|electric)_(\d+)$/);
+    const match = key.match(/^tenantName_(\d+)$/);
     if (!match) continue;
     const n = Number(match[1]);
     if (Number.isInteger(n) && n >= 1 && n <= 32) roomNumbers.add(n);

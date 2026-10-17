@@ -49,4 +49,14 @@ describe('parsePeriodGrid', () => {
     const rows = parsePeriodGrid(form({ tenantName_0: 'X', tenantName_33: 'Y', tenantName_5: 'Z' }));
     expect(rows.map((r) => r.roomNumber)).toEqual([5]);
   });
+
+  it('bỏ qua phòng chỉ có chỉ số điện mà không có tên, để không xoá mất dữ liệu cũ', () => {
+    const rows = parsePeriodGrid(form({ electric_7: '18852' }));
+    expect(rows).toEqual([]);
+  });
+
+  it('bỏ qua phòng chỉ có ô tích occupied mà không có tên', () => {
+    const rows = parsePeriodGrid(form({ occupied_7: 'on' }));
+    expect(rows).toEqual([]);
+  });
 });
