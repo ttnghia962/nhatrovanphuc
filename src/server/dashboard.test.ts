@@ -30,6 +30,7 @@ function summary(month: number, rows: RoomBill[]): PeriodSummary {
       lossFee: 0,
       total: rows.reduce((s, r) => s + r.total, 0),
     },
+    hasData: true,
   };
 }
 
@@ -72,5 +73,17 @@ describe('buildYearDashboard', () => {
 
     const dashboard = buildYearDashboard(2026, [other]);
     expect(dashboard.yearTotals.total).toBe(0);
+  });
+
+  it('kỳ rỗng (hasData=false) không cộng vào tổng năm dù totals có số', () => {
+    const empty: PeriodSummary = {
+      ...summary(8, [bill(1, true, 820000)]),
+      hasData: false,
+    };
+
+    const dashboard = buildYearDashboard(2026, [empty]);
+    expect(dashboard.yearTotals.total).toBe(0);
+    expect(dashboard.monthlyTotals[7].total).toBe(0);
+    expect(dashboard.occupiedCountByMonth[7]).toBe(0);
   });
 });

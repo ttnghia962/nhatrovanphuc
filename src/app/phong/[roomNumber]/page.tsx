@@ -30,8 +30,8 @@ export default async function RoomPage({
     loadRoomYearBreakdown(roomNumber, year),
   ]);
 
-  const bill = summary.rows.find((r) => r.roomNumber === roomNumber);
-  if (!bill) notFound();
+  // Kỳ rỗng: summary.rows trống. Không 404 — khách thuê chỉ chưa có số liệu.
+  const bill = summary.rows.find((r) => r.roomNumber === roomNumber) ?? null;
 
   return (
     <main className="mx-auto flex max-w-5xl flex-col gap-8 p-6">
@@ -44,7 +44,13 @@ export default async function RoomPage({
         </Link>
       </header>
 
-      <RoomSummaryTable bill={bill} />
+      {bill ? (
+        <RoomSummaryTable bill={bill} />
+      ) : (
+        <p className="rounded bg-slate-100 p-4">
+          Chưa có số liệu cho {formatPeriod({ year, month })}.
+        </p>
+      )}
 
       <h2 className="text-xl font-bold">Chi tiết cả năm {year}</h2>
 

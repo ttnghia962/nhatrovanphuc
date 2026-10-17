@@ -109,8 +109,15 @@ export async function exportYearWorkbook(year: number, month: number): Promise<B
     MONTHS.map((m) => loadPeriodSummary({ year, month: m })),
   );
   const summary = summaries[month - 1];
-  const breakdowns = summary.rows.map((row) =>
-    buildRoomYearBreakdown(row.roomNumber, year, summaries),
+
+  // Danh sách phòng lấy từ MỌI kỳ trong năm, không chỉ kỳ được yêu cầu: kỳ đó
+  // có thể rỗng (hasData = false, rows rỗng) nhưng các sheet phụ vẫn phải liệt
+  // kê đủ phòng của những tháng đã có dữ liệu.
+  const roomNumbers = [
+    ...new Set(summaries.flatMap((s) => s.rows.map((r) => r.roomNumber))),
+  ].sort((a, b) => a - b);
+  const breakdowns = roomNumbers.map((roomNumber) =>
+    buildRoomYearBreakdown(roomNumber, year, summaries),
   );
 
   const workbook = buildWorkbook({ year, month, summary, breakdowns });

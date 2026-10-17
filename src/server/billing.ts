@@ -36,6 +36,30 @@ export interface PeriodSummary {
   period: Period;
   rows: RoomBill[];
   totals: PeriodTotals;
+  /**
+   * false khi kỳ này chưa hề được chạm tới: không có MonthlyRecord nào và
+   * cũng không có MeterReading nào của chính kỳ đó. Kỳ rỗng không được sinh
+   * ra doanh thu: `rows` để trống và `totals` bằng 0, để các tầng trên
+   * (dashboard, bảng chi tiết năm) hiển thị gạch ngang thay vì số tiền bịa.
+   */
+  hasData: boolean;
+}
+
+export function zeroTotals(): PeriodTotals {
+  return { roomFee: 0, trashFee: 0, electricFee: 0, waterFee: 0, lossFee: 0, total: 0 };
+}
+
+/**
+ * Hàm thuần: kỳ này đã có dữ liệu chưa?
+ * Chỉ tính MeterReading của ĐÚNG kỳ đang xét — `data.readings` còn chứa chỉ số
+ * kỳ trước (dùng làm "số cũ"), nếu đếm cả thì tháng 9 rỗng sẽ bị coi là có dữ liệu
+ * chỉ vì tháng 8 có.
+ */
+export function periodHasData(data: PeriodData): boolean {
+  if (data.records.length > 0) return true;
+  return data.readings.some(
+    (r) => r.year === data.period.year && r.month === data.period.month,
+  );
 }
 
 function readingValue(
@@ -56,6 +80,10 @@ function readingValue(
 
 /** Hàm thuần: nhận dữ liệu đã nạp sẵn, trả bảng TỔNG QUAN của kỳ. */
 export function buildPeriodSummary(data: PeriodData): PeriodSummary {
+  if (!periodHasData(data)) {
+    return { period: data.period, rows: [], totals: zeroTotals(), hasData: false };
+  }
+
   const prev = previousPeriod(data.period);
 
   const rows: RoomBill[] = data.rooms
@@ -96,10 +124,10 @@ export function buildPeriodSummary(data: PeriodData): PeriodSummary {
       lossFee: acc.lossFee + row.lossFee,
       total: acc.total + row.total,
     }),
-    { roomFee: 0, trashFee: 0, electricFee: 0, waterFee: 0, lossFee: 0, total: 0 },
+    zeroTotals(),
   );
 
-  return { period: data.period, rows, totals };
+  return { period: data.period, rows, totals, hasData: true };
 }
 
 /** Nạp dữ liệu từ DB cho một kỳ rồi dựng bảng TỔNG QUAN. */

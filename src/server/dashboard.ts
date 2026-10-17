@@ -1,5 +1,5 @@
 import { MONTHS } from '@/lib/period';
-import { loadPeriodSummary, type PeriodSummary, type PeriodTotals } from './billing';
+import { loadPeriodSummary, zeroTotals, type PeriodSummary, type PeriodTotals } from './billing';
 
 export interface YearDashboard {
   year: number;
@@ -7,10 +7,6 @@ export interface YearDashboard {
   monthlyTotals: PeriodTotals[];
   yearTotals: PeriodTotals;
   occupiedCountByMonth: number[];
-}
-
-function zeroTotals(): PeriodTotals {
-  return { roomFee: 0, trashFee: 0, electricFee: 0, waterFee: 0, lossFee: 0, total: 0 };
 }
 
 function addTotals(a: PeriodTotals, b: PeriodTotals): PeriodTotals {
@@ -32,7 +28,9 @@ export function buildYearDashboard(year: number, summaries: PeriodSummary[]): Ye
   for (const month of MONTHS) {
     const summary = summaries.find((s) => s.period.year === year && s.period.month === month);
 
-    if (!summary) {
+    // Kỳ rỗng (chưa có MonthlyRecord và chưa có chỉ số nào) không được sinh
+    // doanh thu: không cộng vào tổng năm, không đếm phòng có người ở.
+    if (!summary || !summary.hasData) {
       monthlyTotals.push(zeroTotals());
       occupiedCountByMonth.push(0);
       continue;

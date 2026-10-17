@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildPeriodSummary, type PeriodData } from './billing';
+import { buildPeriodSummary, periodHasData, type PeriodData } from './billing';
 import type { RateRow } from '@/lib/billing/rates';
 
 const rates: RateRow[] = [
@@ -102,5 +102,72 @@ describe('buildPeriodSummary', () => {
     );
 
     expect(summary.rows.find((r) => r.roomNumber === 1)!.total).toBe(1202000);
+  });
+
+  it('kỳ chưa hề có dữ liệu thì không sinh doanh thu', () => {
+    const summary = buildPeriodSummary(data({ records: [], readings: [] }));
+
+    expect(summary.hasData).toBe(false);
+    expect(summary.rows).toEqual([]);
+    expect(summary.totals).toEqual({
+      roomFee: 0,
+      trashFee: 0,
+      electricFee: 0,
+      waterFee: 0,
+      lossFee: 0,
+      total: 0,
+    });
+  });
+
+  it('kỳ chỉ có chỉ số của kỳ TRƯỚC vẫn là kỳ rỗng', () => {
+    const summary = buildPeriodSummary(
+      data({
+        records: [],
+        readings: [
+          { roomNumber: 1, meterType: 'ELECTRIC', year: 2026, month: 7, value: 18708 },
+        ],
+      }),
+    );
+
+    expect(summary.hasData).toBe(false);
+  });
+
+  it('chỉ cần một chỉ số của chính kỳ này là kỳ đã có dữ liệu', () => {
+    const summary = buildPeriodSummary(
+      data({
+        records: [],
+        readings: [
+          { roomNumber: 1, meterType: 'WATER', year: 2026, month: 8, value: 1500 },
+        ],
+      }),
+    );
+
+    expect(summary.hasData).toBe(true);
+    expect(summary.rows).toHaveLength(2);
+  });
+
+  it('chỉ cần một MonthlyRecord là kỳ đã có dữ liệu', () => {
+    const summary = buildPeriodSummary(
+      data({
+        records: [
+          { roomNumber: 1, tenantName: 'Huyền', occupied: true, locked: false, snapshotJson: null },
+        ],
+        readings: [],
+      }),
+    );
+
+    expect(summary.hasData).toBe(true);
+    // Phòng 26 không có MonthlyRecord nhưng kỳ đang dùng -> vẫn mặc định có người ở.
+    expect(summary.rows.find((r) => r.roomNumber === 26)!.occupied).toBe(true);
+  });
+});
+
+describe('periodHasData', () => {
+  it('rỗng khi không có record và không có chỉ số của kỳ', () => {
+    expect(periodHasData(data({ records: [], readings: [] }))).toBe(false);
+  });
+
+  it('có dữ liệu khi tồn tại record', () => {
+    expect(periodHasData(data({ readings: [] }))).toBe(true);
   });
 });

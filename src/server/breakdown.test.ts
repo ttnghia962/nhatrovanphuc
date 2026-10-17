@@ -31,6 +31,7 @@ function summary(month: number, row: RoomBill): PeriodSummary {
       lossFee: row.lossFee,
       total: row.total,
     },
+    hasData: true,
   };
 }
 
@@ -80,5 +81,14 @@ describe('buildRoomYearBreakdown', () => {
 
     expect(result.room.months[7]).toBe(0);
     expect(result.grandTotal.months[7]).toBe(0);
+  });
+
+  it('kỳ rỗng (hasData=false) để null chứ không phải 0', () => {
+    const empty: PeriodSummary = { ...summary(8, bill()), hasData: false };
+    const result = buildRoomYearBreakdown(1, 2026, [empty]);
+
+    expect(result.room.months[7]).toBeNull();
+    expect(result.grandTotal.months[7]).toBeNull();
+    expect(result.grandTotal.total).toBe(0);
   });
 });

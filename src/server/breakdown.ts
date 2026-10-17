@@ -49,7 +49,8 @@ export function buildRoomYearBreakdown(
     const summary = summaries.find(
       (s) => s.period.year === year && s.period.month === month,
     );
-    if (!summary) continue;
+    // Kỳ rỗng để nguyên null cho cả 12 ô -> MoneyCell hiển thị gạch ngang.
+    if (!summary || !summary.hasData) continue;
 
     const row = summary.rows.find((r) => r.roomNumber === roomNumber);
     if (!row) continue;

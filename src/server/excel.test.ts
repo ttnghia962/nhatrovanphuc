@@ -28,6 +28,7 @@ const summary: PeriodSummary = {
     lossFee: 53900,
     total: 1413000,
   },
+  hasData: true,
 };
 
 function emptyLine() {
