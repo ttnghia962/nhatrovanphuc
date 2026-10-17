@@ -1,36 +1,111 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Nhà trọ Văn Phúc
 
-## Getting Started
+Website thay quyển sổ tay tính tiền phòng của nhà trọ Văn Phúc (32 phòng).
+Mỗi tháng tính tiền phòng, tiền rác, tiền điện, tiền nước cộng 10% tiền hao
+hụt trên điện + nước, rồi xuất ra Excel.
 
-First, run the development server:
+- Khách thuê đăng nhập bằng cách **chọn số phòng**, không cần mật khẩu.
+- Quản lý đăng nhập bằng **mã PIN 6 số**.
+- Mọi khoản tiền là số nguyên đồng. Một kỳ là cặp số nguyên `năm` + `tháng`.
+
+## Yêu cầu trước khi chạy
+
+- **Node.js >= 20** (xem `engines` trong `package.json`).
+- npm (đi kèm Node).
+- Không cần cài thêm máy chủ cơ sở dữ liệu: dự án dùng SQLite, dữ liệu nằm ở
+  `prisma/dev.db`.
+
+## Cài đặt
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Mở `.env` và điền:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Biến             | Ý nghĩa                                                      |
+| ---------------- | ------------------------------------------------------------ |
+| `DATABASE_URL`   | Đường dẫn file SQLite, mặc định `file:./dev.db`.             |
+| `SESSION_SECRET` | Khoá ký cookie phiên. **Bắt buộc**, xem cảnh báo bên dưới.   |
+| `TZ`             | **Phải là `Asia/Ho_Chi_Minh`**, xem cảnh báo bên dưới.       |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Sinh `SESSION_SECRET`:
 
-## Learn More
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
+```
 
-To learn more about Next.js, take a look at the following resources:
+> **Thiếu `SESSION_SECRET` là app không boot được.** Mọi trang, kể cả
+> `/login`, đều đọc cookie phiên nên sẽ lỗi ngay
+> `Thiếu biến môi trường SESSION_SECRET` và không có trang nào quay lại được.
+> Nếu gặp lỗi này, hãy kiểm tra `.env` trước tiên.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+> **`TZ=Asia/Ho_Chi_Minh` là yêu cầu thật, không phải tuỳ chọn.** Hạn nhập chỉ
+> số nước là 00:00 ngày 10 của tháng kế tiếp, tính theo **giờ địa phương của
+> máy chủ**. Máy chủ chạy UTC sẽ khoá sớm 7 tiếng, tức khách thuê bị chặn từ
+> 17:00 ngày 9 — sai so với lời hứa với chủ nhà. Khi triển khai (systemd,
+> Docker, PM2...) phải đặt `TZ` cho tiến trình Node, không chỉ cho shell.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Tạo cơ sở dữ liệu
 
-## Deploy on Vercel
+```bash
+npm run db:push   # dựng bảng theo prisma/schema.prisma
+npm run db:seed   # 32 phòng, 4 đơn giá chung từ 01/2026, PIN quản lý mặc định
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+`db:seed` chạy lại được nhiều lần (upsert), không ghi đè đơn giá đã sửa và
+không ghi đè mã PIN nếu quản lý đã đổi.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Mã PIN quản lý
+
+Sau khi seed, **PIN mặc định là `000000`**.
+
+> **Đổi PIN ngay lần đăng nhập đầu tiên** tại `/admin/doi-ma-pin`. Để nguyên
+> `000000` thì ai cũng vào được trang quản lý.
+
+PIN được lưu **nguyên văn** trong cơ sở dữ liệu một cách có chủ ý, để chủ nhà
+quên thì đọc lại được:
+
+```bash
+npm run admin:pin   # in ra mã PIN quản lý hiện tại
+```
+
+## Chạy
+
+```bash
+npm run dev     # máy cá nhân, http://localhost:3000
+```
+
+Triển khai thật:
+
+```bash
+npm run build
+npm run start
+```
+
+Trang gốc `/` chuyển thẳng sang `/login`.
+
+## Kiểm tra
+
+```bash
+npm test            # vitest, chạy một lượt
+npm run test:watch  # vitest ở chế độ theo dõi
+npx tsc --noEmit    # kiểm tra kiểu
+npx eslint .        # kiểm tra lint
+```
+
+## Dùng hằng ngày
+
+| Việc                                | Chỗ làm                              |
+| ----------------------------------- | ------------------------------------ |
+| Xem tổng quan cả năm, khoá sổ tháng | `/admin`                             |
+| Bảng TỔNG QUAN + nhập liệu một kỳ   | `/admin/ky/<năm>/<tháng>`            |
+| Sửa đơn giá theo mốc thời gian      | `/admin/don-gia`                     |
+| Đổi mã PIN                          | `/admin/doi-ma-pin`                  |
+| Tải Excel một kỳ                    | nút "Tải Excel" trên trang kỳ        |
+| Khách thuê xem bill, nhập chỉ số nước | `/phong/<số phòng>`                |
+
+Khách thuê tự nhập chỉ số nước đến hết ngày 9 của tháng kế tiếp. Quá hạn thì
+quản lý nhập giúp ở lưới nhập liệu của kỳ đó. Kỳ đã khoá sổ thì phải mở khoá ở
+`/admin` trước khi sửa được.
