@@ -1,12 +1,8 @@
 import { notFound } from 'next/navigation';
 import { previousPeriod, formatPeriod } from '@/lib/period';
-import {
-  formatWaterDeadline,
-  isWaterEntryOpen,
-  currentWaterEntryPeriod,
-} from '@/lib/billing/water-deadline';
+import { formatWaterDeadline, currentWaterEntryPeriod } from '@/lib/billing/water-deadline';
 import { prisma } from '@/server/db';
-import { getSession, requireRoom } from '@/server/session';
+import { requireRoom } from '@/server/session';
 import { submitWaterReading } from '@/server/actions/readings';
 
 export default async function WaterPage({
@@ -22,15 +18,15 @@ export default async function WaterPage({
 
   await requireRoom(roomNumber);
   const { loi } = await searchParams;
-  const session = await getSession();
 
   const now = new Date();
+  // currentWaterEntryPeriod luôn trả về kỳ CÒN mở tại thời điểm now (trước ngày
+  // 10 là tháng trước, từ ngày 10 là tháng này), nên trang này không bao giờ ở
+  // trạng thái "quá hạn" — không cần nhánh khoá form. Hạn vẫn được kiểm lại ở
+  // server trong submitWaterReading. Kỳ đã trôi qua hạn thì quản lý sửa ở
+  // /admin/ky/[year]/[month].
   const period = currentWaterEntryPeriod(now);
   const prev = previousPeriod(period);
-
-  const open = isWaterEntryOpen(period, now);
-  // Admin vẫn sửa được sau hạn; chỉ khách thuê bị chặn.
-  const canSubmit = open || session?.role === 'admin';
 
   const [previousReading, currentReading] = await Promise.all([
     prisma.meterReading.findUnique({
@@ -68,19 +64,10 @@ export default async function WaterPage({
         <strong>{previousReading ? previousReading.value : 'chưa có'}</strong>
       </p>
 
-      {open ? (
-        <p className="rounded bg-blue-50 p-3 text-sm text-blue-900">
-          Hạn nhập chỉ số nước {formatPeriod(period)}: <strong>{formatWaterDeadline(period)}</strong>.
-          Quá hạn sẽ tự động khóa.
-        </p>
-      ) : (
-        <p className="rounded bg-amber-100 p-3 text-sm text-amber-900">
-          Đã quá hạn nhập chỉ số nước {formatPeriod(period)} ({formatWaterDeadline(period)}).
-          {session?.role === 'admin'
-            ? ' Bạn đang đăng nhập bằng quyền quản lý nên vẫn sửa được.'
-            : ' Vui lòng báo quản lý nếu cần chỉnh sửa.'}
-        </p>
-      )}
+      <p className="rounded bg-blue-50 p-3 text-sm text-blue-900">
+        Hạn nhập chỉ số nước {formatPeriod(period)}: <strong>{formatWaterDeadline(period)}</strong>.
+        Quá hạn sẽ tự động khóa; khi đó vui lòng báo quản lý để quản lý nhập giúp.
+      </p>
 
       <form action={submitWaterReading} className="flex flex-col gap-3">
         <input type="hidden" name="roomNumber" value={roomNumber} />
@@ -97,17 +84,12 @@ export default async function WaterPage({
           min={0}
           step={1}
           required
-          disabled={!canSubmit}
           defaultValue={currentReading?.value ?? ''}
-          className="rounded border p-3 text-lg disabled:bg-slate-100 disabled:text-slate-400"
+          className="rounded border p-3 text-lg"
         />
 
-        <button
-          type="submit"
-          disabled={!canSubmit}
-          className="rounded bg-blue-600 p-3 font-medium text-white disabled:bg-slate-400"
-        >
-          {canSubmit ? 'Lưu chỉ số' : 'Đã khóa'}
+        <button type="submit" className="rounded bg-blue-600 p-3 font-medium text-white">
+          Lưu chỉ số
         </button>
       </form>
     </main>
