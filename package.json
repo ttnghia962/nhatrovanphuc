@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "db:push": "prisma db push",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "admin:pin": "tsx scripts/show-admin-pin.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

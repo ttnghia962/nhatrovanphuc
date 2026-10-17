@@ -16,6 +16,11 @@ export default async function LoginPage({
       {loi === 'sai-pin' && (
         <p className="rounded bg-red-100 p-3 text-red-800">Mã PIN không đúng.</p>
       )}
+      {loi === 'doi-pin-xong' && (
+        <p className="rounded bg-green-100 p-3 text-green-900">
+          Đã đổi mã PIN. Vui lòng đăng nhập lại bằng mã mới.
+        </p>
+      )}
       {loi === 'phong-khong-hop-le' && (
         <p className="rounded bg-red-100 p-3 text-red-800">Số phòng không hợp lệ.</p>
       )}

@@ -12,6 +12,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           Quản lý
         </Link>
         <Link href="/admin/don-gia">Đơn giá</Link>
+        <Link href="/admin/doi-ma-pin">Đổi mã PIN</Link>
         <form action={logout} className="ml-auto">
           <button type="submit" className="underline">
             Thoát
