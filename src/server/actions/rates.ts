@@ -17,20 +17,29 @@ export async function createRate(formData: FormData) {
 
   const { feeType, roomNumber, effectiveYear, effectiveMonth, unitPrice } = parsed.data;
 
-  const existing = await prisma.rate.findFirst({
-    where: { feeType, roomNumber, effectiveYear, effectiveMonth },
-  });
-
-  if (existing) {
-    await prisma.rate.update({ where: { id: existing.id }, data: { unitPrice } });
-  } else {
-    await prisma.rate.create({
-      data: { feeType, roomNumber, effectiveYear, effectiveMonth, unitPrice },
+  let ok = true;
+  try {
+    const existing = await prisma.rate.findFirst({
+      where: { feeType, roomNumber, effectiveYear, effectiveMonth },
     });
+
+    if (existing) {
+      await prisma.rate.update({ where: { id: existing.id }, data: { unitPrice } });
+    } else {
+      await prisma.rate.create({
+        data: { feeType, roomNumber, effectiveYear, effectiveMonth, unitPrice },
+      });
+    }
+  } catch {
+    ok = false;
   }
 
   revalidatePath('/admin/don-gia');
-  redirect('/admin/don-gia?luu=xong');
+  redirect(
+    ok
+      ? '/admin/don-gia?luu=xong'
+      : `/admin/don-gia?loi=${encodeURIComponent('Không lưu được đơn giá, có thể vừa có người khác sửa cùng lúc. Vui lòng thử lại.')}`,
+  );
 }
 
 export async function deleteRate(formData: FormData) {
@@ -39,8 +48,17 @@ export async function deleteRate(formData: FormData) {
   const id = z.coerce.number().int().safeParse(formData.get('id'));
   if (!id.success) redirect('/admin/don-gia');
 
-  await prisma.rate.delete({ where: { id: id.data } });
+  let ok = true;
+  try {
+    await prisma.rate.delete({ where: { id: id.data } });
+  } catch {
+    ok = false;
+  }
 
   revalidatePath('/admin/don-gia');
-  redirect('/admin/don-gia?luu=xong');
+  redirect(
+    ok
+      ? '/admin/don-gia?luu=xong'
+      : `/admin/don-gia?loi=${encodeURIComponent('Đơn giá này không còn tồn tại, có thể đã bị xoá rồi')}`,
+  );
 }
