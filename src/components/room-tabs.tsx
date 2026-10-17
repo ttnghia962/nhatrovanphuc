@@ -36,7 +36,8 @@ export function RoomTabs({ roomNumber }: { roomNumber: string }) {
   }
 
   return (
-    <div className="flex items-center justify-between px-2 sm:justify-start sm:px-4">
+    // Lề = lề nội dung trừ lề trong của tab (16−8, 24−12), để chữ tab đầu thẳng mép với trang.
+    <div className="mx-auto flex max-w-5xl items-center justify-between px-2 sm:justify-start sm:px-3">
       {ROOM_TABS.map((tab, index) => {
         const isActive = tab.key === active;
         return (

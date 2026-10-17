@@ -3,7 +3,9 @@ export interface PinChangeCheck {
   error: string | null;
 }
 
-const SIX_DIGITS = /^\d{6}$/;
+/** Mã PIN quản lý gồm đúng 8 chữ số. */
+export const PIN_LENGTH = 8;
+export const PIN_PATTERN = /^\d{8}$/;
 
 /**
  * Kiểm tra yêu cầu đổi PIN.
@@ -18,8 +20,8 @@ export function validatePinChange(
   if (current !== storedPin) {
     return { ok: false, error: 'Mã PIN hiện tại không đúng' };
   }
-  if (!SIX_DIGITS.test(next)) {
-    return { ok: false, error: 'Mã PIN mới phải gồm đúng 6 chữ số' };
+  if (!PIN_PATTERN.test(next)) {
+    return { ok: false, error: `Mã PIN mới phải gồm đúng ${PIN_LENGTH} chữ số` };
   }
   if (next !== confirm) {
     return { ok: false, error: 'Hai lần nhập mã PIN mới không khớp nhau' };

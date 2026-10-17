@@ -15,7 +15,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div className="min-h-dvh">
-      <nav className="sticky top-0 z-10 flex flex-wrap items-center border-b bg-slate-800 px-1 py-1 text-[15px] text-white sm:gap-x-3 sm:px-4 sm:text-base">
+      {/* Lề nav = lề nội dung (16px, sm: 24px) trừ lề trong của tab, để chữ "Quản lý" thẳng mép tiêu đề trang. */}
+      <nav className="sticky top-0 z-10 flex flex-wrap items-center border-b bg-slate-800 px-2.5 py-1 text-[14px] text-white min-[390px]:px-2 min-[390px]:text-[15px] sm:gap-x-3 sm:px-3 sm:text-base">
         {TABS.map((tab, index) => (
           <Fragment key={tab.href}>
             {/* Vạch "|" giữa các tab để dễ phân biệt từng mục; vùng bấm vẫn cao đủ cho ngón tay. */}

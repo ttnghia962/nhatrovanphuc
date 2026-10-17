@@ -1,4 +1,5 @@
 import { PrismaClient, FeeType } from '@prisma/client';
+import { initialAdminPin } from '../src/lib/admin/initial-pin';
 
 const prisma = new PrismaClient();
 
@@ -48,14 +49,14 @@ async function main() {
     }
   }
 
-  // PIN quản lý mặc định. Không ghi đè nếu admin đã đổi.
+  // PIN quản lý ban đầu lấy từ .env (ADMIN_INITIAL_PIN). Không ghi đè nếu admin đã đổi.
   await prisma.setting.upsert({
     where: { key: 'ADMIN_PIN' },
     update: {},
-    create: { key: 'ADMIN_PIN', value: '000000' },
+    create: { key: 'ADMIN_PIN', value: initialAdminPin() },
   });
 
-  console.log('Seed xong: 32 phong, 4 don gia chung, PIN mac dinh 000000.');
+  console.log('Seed xong: 32 phong, 4 don gia chung, PIN quan ly lay tu ADMIN_INITIAL_PIN trong .env.');
 }
 
 main()

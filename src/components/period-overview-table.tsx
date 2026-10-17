@@ -16,7 +16,7 @@ export function PeriodOverviewTable({ summary }: { summary: PeriodSummary }) {
   if (!summary.hasData) {
     return (
       <p className="rounded bg-slate-100 p-4">
-        Kỳ này chưa có dữ liệu nào. Nhập ở lưới bên dưới rồi bấm “Lưu toàn bộ”.
+        Kỳ này chưa có dữ liệu nào. Vào tab “Nhập liệu” để nhập số liệu.
       </p>
     );
   }

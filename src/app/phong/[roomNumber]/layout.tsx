@@ -18,21 +18,25 @@ export default async function RoomLayout({
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-10 border-b bg-white shadow-sm">
-        <div className="flex items-center gap-3 border-b border-slate-100 px-4 py-1">
-          <Link href={`/phong/${roomNumber}`} className="py-2 text-lg font-bold">
-            Phòng {roomNumber}
-          </Link>
-          {session?.role === 'admin' ? (
-            <Link href="/admin" className="ml-auto rounded px-3 py-2 text-blue-700">
-              ← Trang quản lý
+        {/* Cùng bề rộng (max-w-5xl) và lề (px-4 / sm:px-6) với <main> của trang, để mép
+            chữ trên thanh điều hướng thẳng hàng với nội dung bên dưới. */}
+        <div className="border-b border-slate-100">
+          <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-1 sm:px-6">
+            <Link href={`/phong/${roomNumber}`} className="py-2 text-lg font-bold">
+              Phòng {roomNumber}
             </Link>
-          ) : (
-            <form action={logout} className="ml-auto">
-              <button type="submit" className="rounded border px-3 py-2 text-slate-700">
-                Thoát ra
-              </button>
-            </form>
-          )}
+            {session?.role === 'admin' ? (
+              <Link href="/admin" className="ml-auto rounded px-3 py-2 text-blue-700">
+                ← Trang quản lý
+              </Link>
+            ) : (
+              <form action={logout} className="ml-auto">
+                <button type="submit" className="rounded border px-3 py-2 text-slate-700">
+                  Thoát ra
+                </button>
+              </form>
+            )}
+          </div>
         </div>
         <nav aria-label="Chọn khoản">
           {/* useSearchParams trong client component cần Suspense bao ngoài. */}

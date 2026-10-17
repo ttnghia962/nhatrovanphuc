@@ -13,8 +13,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "db:push": "prisma db push",
-    "db:seed": "tsx prisma/seed.ts",
-    "admin:pin": "tsx scripts/show-admin-pin.ts"
+    "db:seed": "tsx --env-file=.env prisma/seed.ts",
+    "admin:pin": "tsx scripts/show-admin-pin.ts",
+    "admin:pin:reset": "tsx --env-file=.env scripts/reset-admin-pin.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

@@ -1,18 +1,20 @@
+import { initialAdminPin } from '@/lib/admin/initial-pin';
 import { prisma } from './db';
 
 export const ADMIN_PIN_KEY = 'ADMIN_PIN';
-export const DEFAULT_ADMIN_PIN = '000000';
 
 /**
  * Đọc PIN quản lý từ DB. Nếu chưa có bản ghi (DB chưa seed) thì tạo bản ghi
- * mặc định 000000 để chủ trọ luôn vào được trang quản lý.
+ * bằng PIN ban đầu trong .env (ADMIN_INITIAL_PIN) để chủ trọ luôn vào được
+ * trang quản lý.
  */
 export async function readAdminPin(): Promise<string> {
   const setting = await prisma.setting.findUnique({ where: { key: ADMIN_PIN_KEY } });
   if (setting) return setting.value;
 
-  await prisma.setting.create({ data: { key: ADMIN_PIN_KEY, value: DEFAULT_ADMIN_PIN } });
-  return DEFAULT_ADMIN_PIN;
+  const pin = initialAdminPin();
+  await prisma.setting.create({ data: { key: ADMIN_PIN_KEY, value: pin } });
+  return pin;
 }
 
 export async function writeAdminPin(pin: string): Promise<void> {

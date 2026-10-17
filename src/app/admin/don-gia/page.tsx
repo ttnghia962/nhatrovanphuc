@@ -1,7 +1,9 @@
 import { FEE_TYPE_LABELS, type FeeTypeName } from '@/lib/billing/rates';
+import { FIRST_RATE_YEAR } from '@/lib/admin/rate-form-schema';
 import { formatVnd } from '@/lib/money';
 import { prisma } from '@/server/db';
 import { createRate, deleteRate } from '@/server/actions/rates';
+import { RatePeriodFields } from '@/components/rate-period-fields';
 
 const FEE_TYPES: FeeTypeName[] = ['ROOM', 'TRASH', 'ELECTRIC', 'WATER'];
 
@@ -11,6 +13,8 @@ export default async function RatesPage({
   searchParams: Promise<{ luu?: string; loi?: string }>;
 }) {
   const { luu, loi } = await searchParams;
+  // Năm/tháng hiện tại theo giờ máy chủ, để khoá các tháng đã qua trong form.
+  const now = new Date();
 
   const rates = await prisma.rate.findMany({
     orderBy: [{ feeType: 'asc' }, { effectiveYear: 'desc' }, { effectiveMonth: 'desc' }],
@@ -26,7 +30,7 @@ export default async function RatesPage({
       <form action={createRate} className="flex flex-wrap items-end gap-3 rounded border p-4">
         <label className="flex w-full flex-col gap-1 sm:w-auto">
           <span className="text-sm">Loại phí</span>
-          <select name="feeType" className="rounded border p-2">
+          <select name="feeType" className="h-11 rounded border px-2">
             {FEE_TYPES.map((t) => (
               <option key={t} value={t}>
                 {FEE_TYPE_LABELS[t]}
@@ -35,27 +39,18 @@ export default async function RatesPage({
           </select>
         </label>
 
-        <label className="flex w-full flex-col gap-1 sm:w-auto">
-          <span className="text-sm">Phòng (để trống = áp dụng chung)</span>
-          <input name="roomNumber" type="number" min={1} max={32} className="w-full rounded border p-2 sm:w-40" />
-        </label>
-
-        <label className="flex w-full flex-col gap-1 sm:w-auto">
-          <span className="text-sm">Áp dụng từ năm</span>
-          <input name="effectiveYear" type="number" defaultValue={2026} className="w-full rounded border p-2 sm:w-28" />
-        </label>
-
-        <label className="flex w-full flex-col gap-1 sm:w-auto">
-          <span className="text-sm">Tháng</span>
-          <input name="effectiveMonth" type="number" min={1} max={12} defaultValue={1} className="w-full rounded border p-2 sm:w-20" />
-        </label>
+        <RatePeriodFields
+          currentYear={now.getFullYear()}
+          currentMonth={now.getMonth() + 1}
+          minYear={FIRST_RATE_YEAR}
+        />
 
         <label className="flex w-full flex-col gap-1 sm:w-auto">
           <span className="text-sm">Đơn giá (VND)</span>
-          <input name="unitPrice" type="number" min={0} required className="w-full rounded border p-2 sm:w-40" />
+          <input name="unitPrice" type="number" min={0} required className="h-11 w-full rounded border px-2 sm:w-40" />
         </label>
 
-        <button type="submit" className="w-full rounded bg-blue-600 px-5 py-3 font-medium text-white sm:w-auto">
+        <button type="submit" className="h-11 w-full rounded bg-blue-600 px-5 font-medium text-white sm:w-auto">
           Thêm / cập nhật
         </button>
       </form>

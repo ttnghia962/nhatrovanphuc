@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
-import { rateFormSchema } from '@/lib/admin/rate-form-schema';
+import { effectivePeriodError, rateFormSchema } from '@/lib/admin/rate-form-schema';
 import { prisma } from '../db';
 import { requireAdmin } from '../session';
 
@@ -12,22 +12,29 @@ export async function createRate(formData: FormData) {
 
   const parsed = rateFormSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {
-    redirect('/admin/don-gia?loi=' + encodeURIComponent('Dữ liệu đơn giá không hợp lệ'));
+    const message = parsed.error.issues[0]?.message ?? 'Dữ liệu đơn giá không hợp lệ';
+    redirect('/admin/don-gia?loi=' + encodeURIComponent(message));
   }
 
-  const { feeType, roomNumber, effectiveYear, effectiveMonth, unitPrice } = parsed.data;
+  const { feeType, effectiveYear, effectiveMonth, unitPrice } = parsed.data;
 
+  const timeError = effectivePeriodError({ year: effectiveYear, month: effectiveMonth }, new Date());
+  if (timeError) {
+    redirect('/admin/don-gia?loi=' + encodeURIComponent(timeError));
+  }
+
+  // Đơn giá dùng chung cho mọi phòng, nên roomNumber luôn là null.
   let ok = true;
   try {
     const existing = await prisma.rate.findFirst({
-      where: { feeType, roomNumber, effectiveYear, effectiveMonth },
+      where: { feeType, roomNumber: null, effectiveYear, effectiveMonth },
     });
 
     if (existing) {
       await prisma.rate.update({ where: { id: existing.id }, data: { unitPrice } });
     } else {
       await prisma.rate.create({
-        data: { feeType, roomNumber, effectiveYear, effectiveMonth, unitPrice },
+        data: { feeType, roomNumber: null, effectiveYear, effectiveMonth, unitPrice },
       });
     }
   } catch {

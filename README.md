@@ -5,7 +5,7 @@ Mỗi tháng tính tiền phòng, tiền rác, tiền điện, tiền nước c�
 hụt trên điện + nước, rồi xuất ra Excel.
 
 - Khách thuê đăng nhập bằng cách **chọn số phòng**, không cần mật khẩu.
-- Quản lý đăng nhập bằng **mã PIN 6 số**.
+- Quản lý đăng nhập bằng **mã PIN 8 số**.
 - Mọi khoản tiền là số nguyên đồng. Một kỳ là cặp số nguyên `năm` + `tháng`.
 
 ## Yêu cầu trước khi chạy
@@ -28,6 +28,7 @@ Mở `.env` và điền:
 | ---------------- | ------------------------------------------------------------ |
 | `DATABASE_URL`   | Đường dẫn file SQLite, mặc định `file:./dev.db`.             |
 | `SESSION_SECRET` | Khoá ký cookie phiên. **Bắt buộc**, xem cảnh báo bên dưới.   |
+| `ADMIN_INITIAL_PIN` | Mã PIN quản lý ban đầu, **đúng 8 chữ số**. Xem mục "Mã PIN quản lý". |
 | `TZ`             | **Phải là `Asia/Ho_Chi_Minh`**, xem cảnh báo bên dưới.       |
 
 Sinh `SESSION_SECRET`:
@@ -59,17 +60,24 @@ không ghi đè mã PIN nếu quản lý đã đổi.
 
 ## Mã PIN quản lý
 
-Sau khi seed, **PIN mặc định là `000000`**.
+PIN gồm **đúng 8 chữ số**. PIN ban đầu lấy từ biến `ADMIN_INITIAL_PIN` trong
+`.env` (dùng khi seed DB lần đầu).
 
-> **Đổi PIN ngay lần đăng nhập đầu tiên** tại `/admin/doi-ma-pin`. Để nguyên
-> `000000` thì ai cũng vào được trang quản lý.
+> **Không ghi PIN thật vào code, README hay `.env.example`.** Repo công khai
+> trên GitHub, ai đọc được PIN là vào được trang quản lý của bản đang chạy.
+> PIN thật chỉ nằm trong `.env` (đã gitignore) và trong DB.
 
 PIN được lưu **nguyên văn** trong cơ sở dữ liệu một cách có chủ ý, để chủ nhà
 quên thì đọc lại được:
 
 ```bash
-npm run admin:pin   # in ra mã PIN quản lý hiện tại
+npm run admin:pin         # in ra mã PIN quản lý hiện tại
+npm run admin:pin:reset   # đặt lại PIN về ADMIN_INITIAL_PIN trong .env
 ```
+
+`admin:pin:reset` cũng dùng để chuyển DB cũ còn PIN 6 số sang PIN 8 số. Đặt lại
+PIN không đăng xuất các thiết bị đang đăng nhập; muốn đăng xuất tất cả thì đổi
+`SESSION_SECRET`.
 
 ## Chạy
 
@@ -104,6 +112,7 @@ npx eslint .        # kiểm tra lint
 | Sửa đơn giá theo mốc thời gian      | `/admin/don-gia`                     |
 | Đổi mã PIN                          | `/admin/doi-ma-pin`                  |
 | Tải Excel một kỳ                    | nút "Tải Excel" trên trang kỳ        |
+| Nhập liệu một kỳ bằng Excel         | khối "Nhập bằng Excel" trên trang kỳ: tải file mẫu, điền, tải lên. Cả file được kiểm tra trước, có lỗi thì không lưu gì |
 | Khách thuê xem bill, nhập chỉ số nước | `/phong/<số phòng>`                |
 
 Khách thuê tự nhập chỉ số nước đến hết ngày 9 của tháng kế tiếp. Quá hạn thì

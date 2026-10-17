@@ -52,17 +52,17 @@ export default async function LoginPage({
         </summary>
         <form action={loginAsAdmin} className="mt-3 flex flex-col gap-3">
           <label htmlFor="pin" className="font-medium">
-            Nhập mã PIN 6 số
+            Nhập mã PIN 8 số
           </label>
           <input
             id="pin"
             name="pin"
             type="password"
             inputMode="numeric"
-            pattern="\d{6}"
-            maxLength={6}
+            pattern="\d{8}"
+            maxLength={8}
             autoComplete="off"
-            className="rounded border p-3 text-center text-2xl tracking-[0.5em]"
+            className="rounded border p-3 text-center text-2xl tracking-[0.4em]"
           />
           <button type="submit" className="rounded bg-slate-800 p-3 font-medium text-white">
             Vào trang quản lý

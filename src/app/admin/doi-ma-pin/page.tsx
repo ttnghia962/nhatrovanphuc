@@ -14,7 +14,7 @@ export default async function ChangePinPage({
       {loi && <p className="rounded bg-red-100 p-3 text-red-800">{loi}</p>}
 
       <p className="rounded bg-amber-100 p-3 text-sm text-amber-900">
-        Mã PIN gồm đúng 6 chữ số. Sau khi đổi, bạn sẽ phải đăng nhập lại bằng mã mới.
+        Mã PIN gồm đúng 8 chữ số. Sau khi đổi, bạn sẽ phải đăng nhập lại bằng mã mới.
       </p>
 
       <form action={changeAdminPin} className="flex flex-col gap-3">
@@ -26,7 +26,7 @@ export default async function ChangePinPage({
           name="current"
           type="password"
           inputMode="numeric"
-          maxLength={6}
+          maxLength={8}
           required
           autoComplete="off"
           className="rounded border p-3 tracking-widest"
@@ -40,8 +40,8 @@ export default async function ChangePinPage({
           name="next"
           type="password"
           inputMode="numeric"
-          pattern="\d{6}"
-          maxLength={6}
+          pattern="\d{8}"
+          maxLength={8}
           required
           autoComplete="off"
           className="rounded border p-3 tracking-widest"
@@ -55,8 +55,8 @@ export default async function ChangePinPage({
           name="confirm"
           type="password"
           inputMode="numeric"
-          pattern="\d{6}"
-          maxLength={6}
+          pattern="\d{8}"
+          maxLength={8}
           required
           autoComplete="off"
           className="rounded border p-3 tracking-widest"
