@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum FeeType {
+  ROOM
+  TRASH
+  ELECTRIC
+  WATER
+}
+
+enum MeterType {
+  ELECTRIC
+  WATER
+}
+
+enum EnteredBy {
+  ADMIN
+  TENANT
+}
+
+model Room {
+  number            Int             @id
+  defaultTenantName String          @default("")
+  rates             Rate[]
+  readings          MeterReading[]
+  records           MonthlyRecord[]
+}
+
+/// Đơn giá có hiệu lực từ một mốc thời gian. roomNumber = null nghĩa là áp dụng chung mọi phòng.
+model Rate {
+  id             Int     @id @default(autoincrement())
+  feeType        FeeType
+  roomNumber     Int?
+  room           Room?   @relation(fields: [roomNumber], references: [number])
+  effectiveYear  Int
+  effectiveMonth Int
+  unitPrice      Int
+  note           String  @default("")
+
+  @@unique([feeType, roomNumber, effectiveYear, effectiveMonth])
+  @@index([feeType, effectiveYear, effectiveMonth])
+}
+
+/// Chỉ số đồng hồ ghi tại kỳ (year, month). Số tiêu thụ = chỉ số kỳ này trừ chỉ số kỳ trước.
+model MeterReading {
+  id         Int       @id @default(autoincrement())
+  roomNumber Int
+  room       Room      @relation(fields: [roomNumber], references: [number])
+  meterType  MeterType
+  year       Int
+  month      Int
+  value      Int
+  enteredBy  EnteredBy
+  recordedAt DateTime  @default(now())
+
+  @@unique([roomNumber, meterType, year, month])
+  @@index([year, month])
+}
+
+/// Cấu hình dạng khoá-giá trị. Hiện dùng cho khoá 'ADMIN_PIN'.
+model Setting {
+  key   String @id
+  value String
+}
+
+/// Trạng thái một phòng trong một kỳ. snapshotJson chỉ ghi khi locked = true.
+model MonthlyRecord {
+  id           Int     @id @default(autoincrement())
+  roomNumber   Int
+  room         Room    @relation(fields: [roomNumber], references: [number])
+  year         Int
+  month        Int
+  tenantName   String  @default("")
+  occupied     Boolean @default(true)
+  locked       Boolean @default(false)
+  snapshotJson String?
+
+  @@unique([roomNumber, year, month])
+  @@index([year, month])
+}
