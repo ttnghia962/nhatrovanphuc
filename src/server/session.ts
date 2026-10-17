@@ -52,6 +52,9 @@ export async function setSession(session: Session): Promise<void> {
   (await cookies()).set(SESSION_COOKIE, encodeSession(session, secret()), {
     httpOnly: true,
     sameSite: 'lax',
+    // Cookie này là toàn bộ ranh giới khách thuê / quản lý. Bật secure khi chạy
+    // thật (HTTPS); ở máy cá nhân và trong mạng LAN vẫn là HTTP nên không bật.
+    secure: process.env.NODE_ENV === 'production',
     path: '/',
     maxAge: 60 * 60 * 24 * 30,
   });
