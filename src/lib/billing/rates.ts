@@ -51,3 +51,10 @@ export function pickRate(
   );
   return shared ? shared.unitPrice : null;
 }
+
+export const FEE_TYPE_LABELS: Record<FeeTypeName, string> = {
+  ROOM: 'Tiền phòng',
+  TRASH: 'Tiền rác',
+  ELECTRIC: 'Đơn giá điện',
+  WATER: 'Đơn giá nước',
+};
