@@ -5,6 +5,9 @@ prisma/dev.db-journal
 .env
 .superpowers/
 
+# external tools
+.claude/
+
 # testing
 /coverage
 

@@ -1,5 +1,6 @@
 import { MONTHS } from '@/lib/period';
 import { loadPeriodSummary, type PeriodSummary } from './billing';
+import { prisma } from './db';
 
 export interface MonthlyLine {
   /** 12 phần tử, chỉ số 0 là tháng 1. null = chưa có dữ liệu tháng đó. */
@@ -68,6 +69,36 @@ export function buildRoomYearBreakdown(
   return result;
 }
 
+export interface RoomsYearOverview {
+  year: number;
+  rows: { roomNumber: number; total: MonthlyLine }[];
+  /** Cộng cả nhà trọ theo từng tháng; tháng chưa có phòng nào có dữ liệu là null. */
+  allRooms: MonthlyLine;
+}
+
+/** Bảng Tổng cộng của cả 32 phòng trong một năm: mỗi phòng một dòng 12 tháng. */
+export function buildRoomsYearOverview(
+  year: number,
+  roomNumbers: number[],
+  summaries: PeriodSummary[],
+): RoomsYearOverview {
+  const allRooms = emptyLine();
+
+  const rows = roomNumbers.map((roomNumber) => {
+    const breakdown = buildRoomYearBreakdown(roomNumber, year, summaries);
+
+    breakdown.grandTotal.months.forEach((value, index) => {
+      if (value === null) return;
+      allRooms.months[index] = (allRooms.months[index] ?? 0) + value;
+      allRooms.total += value;
+    });
+
+    return { roomNumber, total: breakdown.grandTotal };
+  });
+
+  return { year, rows, allRooms };
+}
+
 export async function loadRoomYearBreakdown(
   roomNumber: number,
   year: number,
@@ -76,4 +107,16 @@ export async function loadRoomYearBreakdown(
     MONTHS.map((month) => loadPeriodSummary({ year, month })),
   );
   return buildRoomYearBreakdown(roomNumber, year, summaries);
+}
+
+export async function loadRoomsYearOverview(year: number): Promise<RoomsYearOverview> {
+  const [rooms, summaries] = await Promise.all([
+    prisma.room.findMany({ select: { number: true }, orderBy: { number: 'asc' } }),
+    Promise.all(MONTHS.map((month) => loadPeriodSummary({ year, month }))),
+  ]);
+  return buildRoomsYearOverview(
+    year,
+    rooms.map((r) => r.number),
+    summaries,
+  );
 }

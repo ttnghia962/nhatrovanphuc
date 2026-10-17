@@ -26,10 +26,10 @@ export function PeriodOverviewTable({ summary }: { summary: PeriodSummary }) {
   return (
     <section className="flex flex-col gap-3">
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-sm">
+        <table className="w-full border-collapse whitespace-nowrap text-sm lg:text-base lg:[&_td]:py-3 lg:[&_th]:py-3">
           <thead>
             <tr className="bg-slate-100">
-              <th rowSpan={2} className="border p-2">
+              <th rowSpan={2} className="sticky left-0 z-[1] border bg-slate-100 p-2">
                 Số phòng
               </th>
               <th rowSpan={2} className="border p-2 text-left">
@@ -71,9 +71,9 @@ export function PeriodOverviewTable({ summary }: { summary: PeriodSummary }) {
             {summary.rows.map((row) => (
               <tr
                 key={row.roomNumber}
-                className={row.issues.length > 0 ? 'bg-amber-50' : undefined}
+                className={row.issues.length > 0 ? 'bg-amber-50' : 'bg-white'}
               >
-                <td className="border p-2 text-center font-medium">
+                <td className="sticky left-0 z-[1] border bg-inherit p-2 text-center font-medium">
                   {row.roomNumber}
                   {row.issues.length > 0 && (
                     <span title={row.issues.join('; ')} className="ml-1 text-amber-700">
@@ -127,7 +127,7 @@ export function PeriodOverviewTable({ summary }: { summary: PeriodSummary }) {
               </tr>
             ))}
             <tr className="bg-slate-100 font-bold">
-              <td className="border p-2 text-center">TỔNG CỘNG</td>
+              <td className="sticky left-0 z-[1] border bg-slate-100 p-2 text-center">TỔNG CỘNG</td>
               <td className="border p-2" />
               <td className="border p-2 text-right">
                 <MoneyCell value={summary.totals.roomFee} />

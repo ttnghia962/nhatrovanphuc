@@ -72,15 +72,15 @@ export default async function PeriodGridPage({
   });
 
   return (
-    <main className="flex flex-col gap-6 p-6">
-      <header className="flex flex-wrap items-center gap-4">
+    <main className="flex flex-col gap-6 px-4 py-4 sm:p-6">
+      <header className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <h1 className="text-2xl font-bold">{formatPeriod({ year, month })}</h1>
-        <Link href={`/admin?nam=${year}`} className="underline">
+        <Link href={`/admin?nam=${year}`} className="py-2 underline">
           ← Tổng quan năm {year}
         </Link>
         <a
           href={`/api/export?nam=${year}&thang=${month}`}
-          className="ml-auto rounded bg-green-700 px-4 py-2 text-white"
+          className="rounded bg-green-700 px-4 py-3 text-white sm:ml-auto"
         >
           Tải Excel {formatPeriod({ year, month })}
         </a>
@@ -93,7 +93,7 @@ export default async function PeriodGridPage({
         <p className="rounded bg-amber-100 p-3 text-amber-900">
           {formatPeriod({ year, month })} đã khoá sổ: số liệu được đóng băng và không sửa được.
           Muốn sửa thì mở khoá ở{' '}
-          <Link href={`/admin?nam=${year}`} className="underline">
+          <Link href={`/admin?nam=${year}`} className="py-2 underline">
             trang tổng quan năm {year}
           </Link>
           .
@@ -111,10 +111,10 @@ export default async function PeriodGridPage({
 
         <fieldset disabled={locked} className="flex flex-col gap-4">
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-sm">
+            <table className="w-full border-collapse text-sm lg:text-base lg:[&_td]:py-3 lg:[&_th]:py-3">
               <thead>
                 <tr className="bg-slate-100">
-                  <th className="p-2">Phòng</th>
+                  <th className="sticky left-0 z-[1] bg-slate-100 p-2">Phòng</th>
                   <th className="p-2">Họ và tên</th>
                   <th className="p-2">Có người ở</th>
                   <th className="p-2">Điện kỳ trước</th>
@@ -126,12 +126,12 @@ export default async function PeriodGridPage({
               <tbody>
                 {gridRows.map((row) => (
                   <tr key={row.roomNumber} className="border-b">
-                    <td className="p-2 text-center font-medium">{row.roomNumber}</td>
+                    <td className="sticky left-0 z-[1] bg-white p-2 text-center font-medium">{row.roomNumber}</td>
                     <td className="p-2">
                       <input
                         name={`tenantName_${row.roomNumber}`}
                         defaultValue={row.tenantName}
-                        className="w-full rounded border p-1"
+                        className="w-full min-w-36 rounded border p-1"
                       />
                     </td>
                     <td className="p-2 text-center">
@@ -139,6 +139,7 @@ export default async function PeriodGridPage({
                         type="checkbox"
                         name={`occupied_${row.roomNumber}`}
                         defaultChecked={row.occupied}
+                        className="h-5 w-5"
                       />
                     </td>
                     <td className="p-2 text-right tabular-nums text-slate-500">
@@ -175,7 +176,7 @@ export default async function PeriodGridPage({
 
           <button
             type="submit"
-            className="self-start rounded bg-blue-600 px-6 py-3 font-medium text-white disabled:bg-slate-400"
+            className="w-full rounded bg-blue-600 px-6 py-3 font-medium text-white disabled:bg-slate-400 sm:w-auto sm:self-start"
           >
             Lưu toàn bộ
           </button>

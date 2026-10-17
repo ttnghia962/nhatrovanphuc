@@ -8,7 +8,7 @@ export default async function ChangePinPage({
   const { loi } = await searchParams;
 
   return (
-    <main className="mx-auto flex max-w-md flex-col gap-6 p-6">
+    <main className="mx-auto flex w-full max-w-md flex-col gap-6 px-4 py-4 sm:p-6">
       <h1 className="text-2xl font-bold">Đổi mã PIN quản lý</h1>
 
       {loi && <p className="rounded bg-red-100 p-3 text-red-800">{loi}</p>}

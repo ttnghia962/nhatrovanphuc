@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { previousPeriod, formatPeriod } from '@/lib/period';
 import { formatWaterDeadline, currentWaterEntryPeriod } from '@/lib/billing/water-deadline';
@@ -52,10 +53,12 @@ export default async function WaterPage({
   ]);
 
   return (
-    <main className="mx-auto flex max-w-md flex-col gap-6 p-6">
-      <h1 className="text-xl font-bold">
-        Phòng {roomNumber} — chỉ số nước {formatPeriod(period)}
-      </h1>
+    <main className="mx-auto flex w-full max-w-md flex-col gap-5 px-4 py-4 sm:p-6">
+      <Link href={`/phong/${roomNumber}`} className="self-start py-2 text-blue-700">
+        ← Xem tiền phòng
+      </Link>
+
+      <h1 className="text-xl font-bold">Chỉ số nước {formatPeriod(period)}</h1>
 
       {loi && <p className="rounded bg-red-100 p-3 text-red-800">{loi}</p>}
 
@@ -81,14 +84,20 @@ export default async function WaterPage({
           id="value"
           name="value"
           type="number"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          enterKeyHint="done"
           min={0}
           step={1}
           required
           defaultValue={currentReading?.value ?? ''}
-          className="rounded border p-3 text-lg"
+          className="rounded border p-4 text-center text-3xl tabular-nums"
         />
 
-        <button type="submit" className="rounded bg-blue-600 p-3 font-medium text-white">
+        <button
+          type="submit"
+          className="rounded-lg bg-blue-600 p-4 text-lg font-medium text-white active:bg-blue-700"
+        >
           Lưu chỉ số
         </button>
       </form>

@@ -7,6 +7,11 @@ export function previousPeriod(p: Period): Period {
   return { year: p.year, month: p.month - 1 };
 }
 
+export function nextPeriod(p: Period): Period {
+  if (p.month === 12) return { year: p.year + 1, month: 1 };
+  return { year: p.year, month: p.month + 1 };
+}
+
 export function comparePeriods(a: Period, b: Period): number {
   if (a.year !== b.year) return a.year - b.year;
   return a.month - b.month;

@@ -1,5 +1,15 @@
 import { describe, it, expect } from 'vitest';
-import { previousPeriod, comparePeriods, formatPeriod } from './period';
+import { previousPeriod, nextPeriod, comparePeriods, formatPeriod } from './period';
+
+describe('nextPeriod', () => {
+  it('tiến 1 tháng trong cùng năm', () => {
+    expect(nextPeriod({ year: 2026, month: 8 })).toEqual({ year: 2026, month: 9 });
+  });
+
+  it('tiến từ tháng 12 sang tháng 1 năm sau', () => {
+    expect(nextPeriod({ year: 2026, month: 12 })).toEqual({ year: 2027, month: 1 });
+  });
+});
 
 describe('previousPeriod', () => {
   it('lùi 1 tháng trong cùng năm', () => {

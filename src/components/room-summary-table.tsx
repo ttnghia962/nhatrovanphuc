@@ -38,7 +38,7 @@ export function RoomSummaryTable({ bill }: { bill: RoomBill }) {
         </ul>
       )}
 
-      <table className="w-full border-collapse">
+      <table className="w-full border-collapse lg:text-lg lg:[&_td]:py-4 lg:[&_th]:py-4">
         <tbody>
           {lines.map((line) => (
             <tr key={line.label} className="border-b">

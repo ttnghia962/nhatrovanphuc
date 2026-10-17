@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildRoomYearBreakdown } from './breakdown';
+import { buildRoomYearBreakdown, buildRoomsYearOverview } from './breakdown';
 import type { PeriodSummary } from './billing';
 import type { RoomBill } from '@/lib/billing/calculate';
 
@@ -90,5 +90,44 @@ describe('buildRoomYearBreakdown', () => {
     expect(result.room.months[7]).toBeNull();
     expect(result.grandTotal.months[7]).toBeNull();
     expect(result.grandTotal.total).toBe(0);
+  });
+});
+
+describe('buildRoomsYearOverview', () => {
+  const rooms = [1, 2];
+
+  function period(month: number, rows: RoomBill[]): PeriodSummary {
+    return { ...summary(month, rows[0]), rows };
+  }
+
+  it('mỗi phòng một dòng, tổng từng tháng và cả năm', () => {
+    const result = buildRoomsYearOverview(2026, rooms, [
+      period(7, [bill(), bill({ roomNumber: 2, total: 1000000 })]),
+      period(8, [bill(), bill({ roomNumber: 2, total: 1000000 })]),
+    ]);
+
+    expect(result.rows.map((r) => r.roomNumber)).toEqual([1, 2]);
+    expect(result.rows[0].total.months[6]).toBe(1413000);
+    expect(result.rows[0].total.total).toBe(2826000);
+    expect(result.rows[1].total.total).toBe(2000000);
+  });
+
+  it('dòng cộng cả nhà trọ: cộng theo tháng, tháng chưa có dữ liệu để null', () => {
+    const result = buildRoomsYearOverview(2026, rooms, [
+      period(8, [bill(), bill({ roomNumber: 2, total: 1000000 })]),
+    ]);
+
+    expect(result.allRooms.months[7]).toBe(2413000);
+    expect(result.allRooms.months[0]).toBeNull();
+    expect(result.allRooms.total).toBe(2413000);
+  });
+
+  it('kỳ rỗng không sinh doanh thu', () => {
+    const empty: PeriodSummary = { ...period(8, [bill()]), hasData: false };
+    const result = buildRoomsYearOverview(2026, rooms, [empty]);
+
+    expect(result.rows[0].total.months[7]).toBeNull();
+    expect(result.allRooms.months[7]).toBeNull();
+    expect(result.allRooms.total).toBe(0);
   });
 });
