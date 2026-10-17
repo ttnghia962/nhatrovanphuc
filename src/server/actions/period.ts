@@ -24,46 +24,48 @@ export async function savePeriodGrid(formData: FormData) {
   const { year, month } = parsed.data;
   const rows = parsePeriodGrid(formData);
 
-  for (const row of rows) {
-    await prisma.monthlyRecord.upsert({
-      where: { roomNumber_year_month: { roomNumber: row.roomNumber, year, month } },
-      update: { tenantName: row.tenantName, occupied: row.occupied },
-      create: {
-        roomNumber: row.roomNumber,
-        year,
-        month,
-        tenantName: row.tenantName,
-        occupied: row.occupied,
-      },
-    });
-
-    if (row.electricReading === null) {
-      await prisma.meterReading.deleteMany({
-        where: { roomNumber: row.roomNumber, meterType: 'ELECTRIC', year, month },
+  await prisma.$transaction(async (tx) => {
+    for (const row of rows) {
+      await tx.monthlyRecord.upsert({
+        where: { roomNumber_year_month: { roomNumber: row.roomNumber, year, month } },
+        update: { tenantName: row.tenantName, occupied: row.occupied },
+        create: {
+          roomNumber: row.roomNumber,
+          year,
+          month,
+          tenantName: row.tenantName,
+          occupied: row.occupied,
+        },
       });
-      continue;
-    }
 
-    await prisma.meterReading.upsert({
-      where: {
-        roomNumber_meterType_year_month: {
+      if (row.electricReading === null) {
+        await tx.meterReading.deleteMany({
+          where: { roomNumber: row.roomNumber, meterType: 'ELECTRIC', year, month },
+        });
+        continue;
+      }
+
+      await tx.meterReading.upsert({
+        where: {
+          roomNumber_meterType_year_month: {
+            roomNumber: row.roomNumber,
+            meterType: 'ELECTRIC',
+            year,
+            month,
+          },
+        },
+        update: { value: row.electricReading, enteredBy: 'ADMIN' },
+        create: {
           roomNumber: row.roomNumber,
           meterType: 'ELECTRIC',
           year,
           month,
+          value: row.electricReading,
+          enteredBy: 'ADMIN',
         },
-      },
-      update: { value: row.electricReading, enteredBy: 'ADMIN' },
-      create: {
-        roomNumber: row.roomNumber,
-        meterType: 'ELECTRIC',
-        year,
-        month,
-        value: row.electricReading,
-        enteredBy: 'ADMIN',
-      },
-    });
-  }
+      });
+    }
+  });
 
   revalidatePath(`/admin/ky/${year}/${month}`);
   redirect(`/admin/ky/${year}/${month}?luu=xong`);
