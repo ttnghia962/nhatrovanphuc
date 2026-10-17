@@ -1,10 +1,5 @@
 import { loginAsAdmin, loginAsTenant } from '@/server/actions/auth';
 
-// Trang đăng nhập luôn động (đọc searchParams, đặt cookie) nên không thể
-// prerender tĩnh dưới Cache Components của Next.js 16 — chặn render thay vì
-// prerender tĩnh.
-export const instant = false;
-
 const ROOMS = Array.from({ length: 32 }, (_, i) => i + 1);
 
 export default async function LoginPage({
