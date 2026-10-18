@@ -1,0 +1,42 @@
+# Chạy trên VPS:  docker compose up -d --build
+# Cần file .env cạnh file này (sao chép từ .env.example) và biến DOMAIN trong đó.
+
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    # Tiến trình init nhỏ để Ctrl+C / docker stop tắt app gọn gàng.
+    init: true
+    env_file: .env
+    environment:
+      # Ghi đè giá trị trong .env: DB phải nằm trong volume, giờ phải là giờ VN.
+      DATABASE_URL: file:/app/data/dev.db
+      TZ: Asia/Ho_Chi_Minh
+    volumes:
+      - nhatro-data:/app/data
+    # Không mở cổng ra ngoài: mọi truy cập đi qua Caddy (HTTPS).
+    expose:
+      - "3000"
+
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN:?Thieu bien DOMAIN trong .env (vd. nhatrovanphuc.com)}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  # Chứa dev.db. TUYỆT ĐỐI không chạy `docker compose down -v` (xoá luôn dữ liệu).
+  nhatro-data:
+  # Chứng chỉ HTTPS của Caddy.
+  caddy-data:
+  caddy-config:

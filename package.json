@@ -15,7 +15,8 @@
     "db:push": "prisma db push",
     "db:seed": "tsx --env-file=.env prisma/seed.ts",
     "admin:pin": "tsx scripts/show-admin-pin.ts",
-    "admin:pin:reset": "tsx --env-file=.env scripts/reset-admin-pin.ts"
+    "admin:pin:reset": "tsx --env-file=.env scripts/reset-admin-pin.ts",
+    "docker:start": "prisma db push --skip-generate && tsx prisma/seed.ts && next start"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

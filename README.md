@@ -94,6 +94,60 @@ npm run start
 
 Trang gốc `/` chuyển thẳng sang `/login`.
 
+## Triển khai lên VPS bằng Docker
+
+Bộ `Dockerfile` + `docker-compose.yml` + `Caddyfile` chạy 2 container: **app**
+(Next.js) và **Caddy** (tự xin/gia hạn chứng chỉ HTTPS, chuyển http → https).
+Container app khi khởi động tự `db push` và seed (seed không ghi đè PIN/đơn giá
+đã sửa), nên không cần chạy tay `db:push`/`db:seed`.
+
+Chuẩn bị:
+
+- VPS Linux, RAM **tối thiểu 2 GB** (build Next.js tốn RAM; 1 GB thì nên bật
+  thêm swap), đã cài Docker (`curl -fsSL https://get.docker.com | sh`).
+- Tên miền có bản ghi **A** trỏ về IP của VPS; mở cổng **80** và **443**.
+
+Lần đầu:
+
+```bash
+git clone <repo> nhatrovanphuc && cd nhatrovanphuc
+cp .env.example .env
+nano .env        # SESSION_SECRET mới, ADMIN_INITIAL_PIN, DOMAIN
+docker compose up -d --build
+docker compose logs -f app   # thấy "Seed xong" và "Ready" là được, Ctrl+C để thoát
+```
+
+`DATABASE_URL` và `TZ` trong `.env` bị `docker-compose.yml` ghi đè bằng giá
+trị đúng cho container, không cần sửa.
+
+Cập nhật code mới:
+
+```bash
+git pull && docker compose up -d --build
+```
+
+Lệnh hay dùng:
+
+```bash
+docker compose exec app npm run -s admin:pin               # xem PIN hiện tại
+docker compose exec app npx tsx scripts/reset-admin-pin.ts # đặt lại PIN theo .env
+docker compose restart app                                 # khởi động lại app
+```
+
+> **Dữ liệu nằm trong volume `nhatro-data`**, không mất khi build lại hay
+> khởi động lại. **Không bao giờ chạy `docker compose down -v`**: cờ `-v` xoá
+> luôn volume, tức là xoá sạch dữ liệu.
+
+Sao lưu (nên đặt cron chạy mỗi ngày, và chép bản sao ra khỏi VPS):
+
+```bash
+mkdir -p backups
+docker compose cp app:/app/data/dev.db ./backups/dev-$(date +%F).db
+```
+
+Khôi phục: `docker compose cp ./backups/<file>.db app:/app/data/dev.db` rồi
+`docker compose restart app`.
+
 ## Kiểm tra
 
 ```bash

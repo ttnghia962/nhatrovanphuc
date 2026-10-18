@@ -1,0 +1,6 @@
+# Caddy tự xin và gia hạn chứng chỉ HTTPS cho tên miền trong biến DOMAIN (.env).
+# Tên miền phải trỏ (bản ghi A) về IP của VPS và cổng 80, 443 phải mở.
+{$DOMAIN} {
+	encode zstd gzip
+	reverse_proxy app:3000
+}
