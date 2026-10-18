@@ -2,6 +2,8 @@ node_modules/
 .next/
 prisma/dev.db
 prisma/dev.db-journal
+data/
+backups/
 .env
 .superpowers/
 
@@ -33,3 +35,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# file trung gian khi OCR sổ tay ra Excel
+outputs/
+anhtest/

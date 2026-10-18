@@ -41,6 +41,8 @@ const breakdown: RoomYearBreakdown = {
   room: { months: [...emptyLine().months], total: 800000 },
   trash: emptyLine(),
   electric: emptyLine(),
+  electricReading: emptyLine(),
+  electricUsage: emptyLine(),
   electricUnitPrice: emptyLine(),
   water: emptyLine(),
   waterUnitPrice: emptyLine(),

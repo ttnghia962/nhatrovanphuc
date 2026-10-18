@@ -59,6 +59,16 @@ describe('buildRoomYearBreakdown', () => {
     expect(result.waterUnitPrice.months[7]).toBe(7000);
   });
 
+  it('ghi chỉ số công tơ điện và số điện dùng của từng tháng', () => {
+    const result = buildRoomYearBreakdown(1, 2026, [summary(7, bill()), summary(8, bill())]);
+
+    expect(result.electricReading.months[7]).toBe(18852);
+    expect(result.electricUsage.months[7]).toBe(144);
+    // Số điện dùng cộng dồn được cả năm; chỉ số công tơ thì không.
+    expect(result.electricUsage.total).toBe(288);
+    expect(result.electricReading.total).toBe(0);
+  });
+
   it('bỏ qua các dòng của phòng khác', () => {
     const other = summary(8, bill({ roomNumber: 2 }));
     const result = buildRoomYearBreakdown(1, 2026, [other]);

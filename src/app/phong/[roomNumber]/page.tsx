@@ -46,8 +46,10 @@ export default async function RoomPage({
     dien: {
       title: 'Tiền điện',
       lines: [
-        { label: 'Thành tiền', line: breakdown.electric },
+        { label: 'Công tơ điện', line: breakdown.electricReading, noTotal: true },
+        { label: 'Số điện (kWh)', line: breakdown.electricUsage },
         { label: 'Đơn giá', line: breakdown.electricUnitPrice, noTotal: true },
+        { label: 'Thành tiền', line: breakdown.electric },
       ],
     },
     nuoc: {

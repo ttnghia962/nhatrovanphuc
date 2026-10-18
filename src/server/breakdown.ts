@@ -14,6 +14,10 @@ export interface RoomYearBreakdown {
   room: MonthlyLine;
   trash: MonthlyLine;
   electric: MonthlyLine;
+  /** Chỉ số công tơ điện cuối tháng (số trên công tơ). */
+  electricReading: MonthlyLine;
+  /** Số điện dùng = công tơ tháng này trừ tháng trước. */
+  electricUsage: MonthlyLine;
   electricUnitPrice: MonthlyLine;
   water: MonthlyLine;
   waterUnitPrice: MonthlyLine;
@@ -40,6 +44,8 @@ export function buildRoomYearBreakdown(
     room: emptyLine(),
     trash: emptyLine(),
     electric: emptyLine(),
+    electricReading: emptyLine(),
+    electricUsage: emptyLine(),
     electricUnitPrice: emptyLine(),
     water: emptyLine(),
     waterUnitPrice: emptyLine(),
@@ -61,6 +67,9 @@ export function buildRoomYearBreakdown(
     put(result.electric, month, row.electric.amount, true);
     put(result.water, month, row.water.amount, true);
     put(result.grandTotal, month, row.total, true);
+    put(result.electricUsage, month, row.electric.usage, true);
+    // Chỉ số công tơ là số đọc trên đồng hồ, cộng lại không có nghĩa.
+    put(result.electricReading, month, row.electric.current, false);
     // Đơn giá không phải tiền tích luỹ nên không cộng vào tổng năm.
     put(result.electricUnitPrice, month, row.electric.unitPrice, false);
     put(result.waterUnitPrice, month, row.water.unitPrice, false);

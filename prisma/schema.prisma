@@ -30,6 +30,7 @@ model Room {
   rates             Rate[]
   readings          MeterReading[]
   records           MonthlyRecord[]
+  householdHead     HouseholdHead?
 }
 
 /// Đơn giá có hiệu lực từ một mốc thời gian. roomNumber = null nghĩa là áp dụng chung mọi phòng.
@@ -83,4 +84,12 @@ model MonthlyRecord {
 
   @@unique([roomNumber, year, month])
   @@index([year, month])
+}
+
+/// Tên chủ hộ của từng phòng. Mới chỉ lưu để dùng sau, chưa hiển thị ở đâu.
+model HouseholdHead {
+  roomNumber Int      @id
+  room       Room     @relation(fields: [roomNumber], references: [number])
+  name       String
+  updatedAt  DateTime @updatedAt
 }
